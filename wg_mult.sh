@@ -26,14 +26,14 @@ function check_selinux(){
     CHECK=$(grep SELINUX= /etc/selinux/config | grep -v "#")
     if [ "$CHECK" == "SELINUX=enforcing" ]; then
         red "============"
-        red "关闭SELinux"
+        red "CloseSELinux"
         red "============"
         sed -i 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/selinux/config
         setenforce 0
     fi
     if [ "$CHECK" == "SELINUX=permissive" ]; then
         red "============"
-        red "关闭SELinux"
+        red "CloseSELinux"
         red "============"
         sed -i 's/SELINUX=permissive/SELINUX=disabled/g' /etc/selinux/config
         setenforce 0
@@ -85,7 +85,7 @@ function install_wg(){
     elif [ "$RELEASE" == "ubuntu" ]; then
         if [ "$VERSION" == "12.04" ] || [ "$VERSION" == "16.04" ]; then
 	    red "=================="
-            red "$RELEASE $VERSION系统暂未支持"
+            red "$RELEASE $VERSIONSystem Temporarily Not Supported"
             red "=================="
 	    exit
 	fi
@@ -114,7 +114,7 @@ function install_wg(){
         install_tools "apt"
     else
         red "=================="
-        red "$RELEASE $VERSION系统暂未支持"
+        red "$RELEASE $VERSIONSystem Temporarily Not Supported"
         red "=================="
     fi
 }
@@ -163,13 +163,13 @@ EOF
     #wg-quick up wg0
     systemctl enable wg-quick@wg0
     content=$(cat /etc/wireguard/client.conf)
-    green "电脑端请下载/etc/wireguard/client.conf文件，手机端可直接使用软件扫码"
+    green "PC terminal configuration can be found in/etc/wireguard/client.conf File，Smartphones can directly scan the QR Code for Configuration"
     green "${content}" | qrencode -o - -t UTF8
-    red "注意：本次安装必须重启一次, wireguard才能正常使用"
-    read -p "是否现在重启 ? [Y/n] :" yn
+    red "ATTENTION: Must RESTART After Installing This Script to use Wireguard"
+    read -p "REBOOT NOW ? [Y/n] :" yn
     [ -z "${yn}" ] && yn="y"
     if [[ $yn == [Yy] ]]; then
-        echo -e "VPS 重启中..."
+        echo -e "VPS REBOOTING..."
         reboot
     fi
 }
@@ -177,9 +177,9 @@ EOF
 function add_user(){
 
     green "=================================="
-    green "给新用户起个名字，不能和已有用户重复"
+    green "Add a new user, it must not match an existing user"
     green "=================================="
-    read -p "请输入用户名：" newname
+    read -p "Enter new username：" newname
     cd /etc/wireguard/
     if [ ! -f "/etc/wireguard/$newname.conf" ]; then
         cp client.conf $newname.conf
@@ -195,12 +195,12 @@ AllowedIPs = 10.77.0.$newnum/32
 EOF
         wg set wg0 peer $(cat tempubkey) allowed-ips 10.77.0.$newnum/32
         green "============================================="
-        green "添加完成，文件：/etc/wireguard/$newname.conf"
+        green "Added Successfully：/etc/wireguard/$newname.conf"
         green "============================================="
         rm -f temprikey tempubkey
     else
         red "======================"
-        red "用户名已存在，请更换名称"
+        red "Username already exists, please try another"
         red "======================"
     fi
 
@@ -213,38 +213,38 @@ function remove_wg(){
         if [ "$RELEASE" == "centos" ]; then
             yum remove -y wireguard-dkms wireguard-tools
             rm -rf /etc/wireguard/
-            green "卸载完成"
+            green "removed successfully"
         elif [ "$RELEASE" == "ubuntu" ]; then
             apt-get remove -y wireguard
             rm -rf /etc/wireguard/
-            green "卸载完成"
+            green "removed successfully"
         elif [ "$RELEASE" == "debian" ]; then
             apt remove -y wireguard
             rm -rf /etc/wireguard/
-            green "卸载完成"
+            green "removed successfully"
         else
-            red "系统不符合要求"
+            red "System Does not match requirements"
         fi
     else
-        red "未检测到wireguard"
+        red "wireguard not tested yet"
     fi
 }
 
 function start_menu(){
     clear
     green "==============================================="
-    green " 介绍: 一键安装wireguard, 增加wireguard多用户"
-    green " 系统: Centos7+/Ubuntu18.04+/Debian9+"
-    green " 作者: atrandys www.atrandys.com"
-    green " 提示: 脚本安装过程中会升级内核，请勿生产环境使用"
+    green " Introduction: One Click Wireguard Setup, Add new Wireguard Usernames"
+    green " Supported Systems: Centos7+/Ubuntu18.04+/Debian9+"
+    green " Thankyou for using One-Click Wireguard Setup"
+    green " Please don't use this script in Production Environment, We recommend using a separate VPS for Wireguard Setup"
     green "==============================================="
-    green "1. 安装wireguard"
-    red "2. 删除wireguard"
-    green "3. 显示默认用户二维码"
-    green "4. 增加用户"
-    red "0. 退出"
+    green "1. Install Wireguard"
+    red "2. Delete Wireguard"
+    green "3. Show Default Username QR Code (configuration)"
+    green "4. Add a new User"
+    red "0. Exit"
     echo
-    read -p "请选择:" num
+    read -p "Please make a selection:" num
     case "$num" in
         1)
         check_selinux
